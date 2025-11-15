@@ -1,35 +1,84 @@
-//TODO add imports if needed
-//import { exMain } from "./exclude/exampleAss2.js"
-//TODO add/change doc as needed
 /**
- * TODO - Write functional code for this application. You can call any other function, but usage of ".toString(numberSystem)" and "Number.parseInt(number, numberSystem)" is forbidden (only permitted when used on individual digits).
- * The main function which calls the application. 
- * TODO - Please, add specific description here for the application purpose.
- * @param {string} inputNumber number that is being converted
- * @param {number} inputNumberSystem numerical system that the inputNumber is being converted from
- * @param {number} outputNumberSystem numerical system that the inputNumber is being converted into
- * @returns {string} containing number converted to output system
+ * Převod nezáporného celého čísla z desítkové do binární soustavy.
+ * @param {string} inputNumber - Číslo uvedené jako textový vstup (např. "15").
+ * @param {number} inputNumberSystem - Vstupní soustava (u nás pouze 10).
+ * @param {number} outputNumberSystem - Výstupní soustava (u nás pouze 2).
+ * @returns {string} - Výsledek převodu jako binární řetězec.
  */
 export function main(inputNumber, inputNumberSystem, outputNumberSystem) {
-  //TODO code
-  //let dtoOut = exMain(inputNumber, inputNumberSystem, outputNumberSystem);
-  return dtoOut;
+  
+  const allowedInputSystems = permittedInputSystems();
+  const allowedOutputSystems = permittedOutputSystems();
+
+  if (!allowedInputSystems.includes(inputNumberSystem)) {
+    throw new Error("Nepodporovaná vstupní soustava: " + inputNumberSystem);
+  }
+  if (!allowedOutputSystems.includes(outputNumberSystem)) {
+    throw new Error("Nepodporovaná výstupní soustava: " + outputNumberSystem);
+  }
+
+  // V tomto řešení podporujeme pouze převod 10 -> 2.
+  if (inputNumberSystem !== 10 || outputNumberSystem !== 2) {
+    throw new Error("Tato kombinace soustav ještě není implementována.");
+  }
+
+  // Zpracování vstupu: řetězec, bez mezer, pouze číslice 0–9 
+  if (typeof inputNumber !== "string") {
+    inputNumber = String(inputNumber);
+  }
+  const s = inputNumber.trim();
+
+  if (s.length === 0) {
+    throw new Error("Chyba - zadej alespoň jednu číslici.");
+  }
+
+  // Nepovolujeme znaménka, tečky apod. jen číslice
+  if (!/^[0-9]+$/.test(s)) {
+    throw new Error("Chyba - povoleny jsou pouze číslice 0-9.");
+  }
+
+  // Speciální případ nuly
+  if (/^0+$/.test(s)) {
+    return "0";
+  }
+
+  // Převod z textu v desítkové soustavě na BigInt
+  // value = 0; pro každou číslici: value = value * 10 + digit
+  let value = 0n;
+  for (let i = 0; i < s.length; i++) {
+    const code = s.charCodeAt(i) - 48; // '0' == 48
+    const digit = BigInt(code);
+    value = value * 10n + digit;
+  }
+
+  // Převod z "desítkového" BigInt na binární zápis pomocí opakovaného dělení 2 ---
+  let bits = "";
+  while (value > 0n) {
+    const remainder = value % 2n; // 0n nebo 1n
+    // přidáme znak '0' nebo '1'
+    bits += remainder === 0n ? "0" : "1";
+    value = value / 2n; // celočíselné dělení
+  }
+
+  // Otočení výsledku
+  const result = bits.split("").reverse().join("");
+
+  
+  return result;
 }
 
 /**
- * TODO - Change this to contain all input number systems that your application can convert from.
- * Function which returns which number systems are permitted on input.
- * @returns {Array} array of numbers refering to permitted input systems
+ * Vrátí pole povolených vstupních soustav.
+ * @returns {number[]} Pole povolených vstupních soustav.
  */
 export function permittedInputSystems() {
-	return [10, 2];
+  return [10];
 }
 
 /**
- * TODO - Change this to contain all output number systems that your application can convert to.
- * Function which returns which number systems are permitted on output.
- * @returns {Array} array of numbers refering to permitted output systems
+ * Vrátí pole povolených výstupních soustav.
+ * @returns {number[]} Pole povolených výstupních soustav.
  */
 export function permittedOutputSystems() {
-	return [10, 2];
+  return [2];
 }
